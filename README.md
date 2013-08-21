@@ -88,10 +88,19 @@ That should print:
 
 
 
-# TODO
+# TODOs
 
-* Code Climate! I :heart: Code Climate.
+For the Project:
+
+* Code Climate! :heart:
 * Set up Travis.
+* .gemspec, all that stuff
+
+For the code:
+
+* Check structure of Hashes & Arrays recursively.
+* Let you add your own Rules. Maybe just let you add Procs, maybe that's enough.
+* Let you handle violations in a callback object? Maybe that's crap, not sure yet.
 * All ___kinds___ of stuff, who am I kidding? I'm just hacking here. Give me some time.
 
 

@@ -82,19 +82,12 @@ That should print:
 
 
 
-
-
-
-
-
-
 # TODOs
 
 For the Project:
 
 * Code Climate! :heart:
 * Set up Travis.
-* .gemspec, all that stuff
 
 For the code:
 

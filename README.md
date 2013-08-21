@@ -102,5 +102,3 @@ For the code:
 * Let you add your own Rules. Maybe just let you add Procs, maybe that's enough.
 * Let you handle violations in a callback object? Maybe that's crap, not sure yet.
 * All ___kinds___ of stuff, who am I kidding? I'm just hacking here. Give me some time.
-
-

@@ -1,23 +1,31 @@
 module Strictures
   extend self
 
-  class Result
-    def initialize(valid)
-      @valid = valid
+  class Results
+    attr_reader :errors
+
+    def initialize(errors)
+      @errors = errors
     end
 
     def valid?
-      @valid
+      @errors.empty?
     end
   end
 
-  def check(obj, stricture)
-    Result.new(stricture.call(obj))
+  def check(obj, *strictures)
+    errors = strictures.map { |stricture|
+      stricture.call(obj)
+    }
+
+    Results.new(errors.compact)
   end
 
   def any(klass)
     ->(x) {
-      x.is_a?(klass)
+      unless x.is_a?(klass)
+        "Expected a #{klass.name}, got a #{x.class.name}: #{x.inspect}"
+      end
     }
   end
 end

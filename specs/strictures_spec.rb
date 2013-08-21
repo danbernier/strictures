@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe Strictures do
+describe Strictures, 'hitting up the module methods directly' do
   describe 'comparing by type' do
     it 'can recognize same types' do
       Strictures.check('hello', Strictures.any(String)).must_be :valid?
@@ -76,5 +76,27 @@ describe Strictures do
         ]
       end
     end
+  end
+end
+
+describe Strictures, 'including it into your own class' do
+  class StringyValidator
+    include Strictures
+
+    def validate(name)
+      check(name, any(String))
+    end
+  end
+
+  subject do
+    StringyValidator.new
+  end
+
+  it 'will validate via instance methods' do
+    subject.validate('Jim Beam').must_be :valid?
+    subject.validate(90210).wont_be :valid?
+    subject.validate(90210).errors.must_equal [
+      'Expected a String, got a Fixnum: 90210'
+    ]
   end
 end

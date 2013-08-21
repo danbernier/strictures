@@ -1,7 +1,7 @@
 require 'strictures/rules.rb'
 
 module Strictures
-  extend Rules
+  include Rules
   extend self
 
   class Results

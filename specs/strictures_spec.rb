@@ -44,4 +44,43 @@ describe Strictures do
       ]
     end
   end
+
+  describe 'checking multiple requirements' do
+    describe 'when all conditions are met' do
+      it 'will say it is valid' do
+        Strictures.check(0, Strictures.any(Fixnum), Strictures.one_of(0,2,4)).must_be :valid?
+      end
+    end
+
+    describe 'when one condition is not met' do
+      it 'will say it is not valid' do
+        Strictures.check(99, Strictures.any(Fixnum), Strictures.one_of(0,2,4)).wont_be :valid?
+        Strictures.check('abc', Strictures.any(Fixnum), Strictures.one_of('abc',2)).wont_be :valid?
+      end
+
+      it 'will return the right error message for the failure' do
+        Strictures.check(99, Strictures.any(Fixnum), Strictures.one_of(0,2,4)).errors.must_equal [
+          'Expected one of [0, 2, 4], but got: 99'
+        ]
+
+        Strictures.check('abc', Strictures.any(Fixnum), Strictures.one_of('abc',2)).errors.must_equal [
+          'Expected a Fixnum, got a String: "abc"'
+        ]
+      end
+    end
+
+    describe 'when many conditions are not met' do
+      it 'will say it is not valid' do
+        Strictures.check('abc', Strictures.any(Fixnum), Strictures.one_of(0,2,4)).wont_be :valid?
+      end
+
+      it 'will return all error messages for the failures' do
+        # TODO: Not sure if this is the way to go, but we'll stick with it for now.
+        Strictures.check('abc', Strictures.any(Fixnum), Strictures.one_of(0,2,4)).errors.must_equal [
+          'Expected a Fixnum, got a String: "abc"',
+          'Expected one of [0, 2, 4], but got: "abc"'
+        ]
+      end
+    end
+  end
 end

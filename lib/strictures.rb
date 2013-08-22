@@ -18,9 +18,20 @@ module Strictures
 
   def check(obj, *strictures)
     errors = strictures.map { |stricture|
-      stricture.call(obj)
+      massage(stricture).call(obj)
     }
 
     Results.new(errors.compact)
+  end
+
+  private
+
+  def massage(stricture)
+    case stricture
+    when Proc
+      stricture
+    when Class
+      any(stricture)
+    end
   end
 end

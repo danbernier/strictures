@@ -1,0 +1,93 @@
+
+def assert(actual_hash, assertions_hash, ancestry=[])
+  failures = []
+
+  unless actual_hash.is_a?(Hash)
+    failures << "Expected a Hash, got a #{actual_hash.class.name}: #{actual_hash.inspect}"
+    return failures
+  end
+
+  assertions_hash.each do |key, assertion|
+    lineage = (ancestry + [key])
+    key_display = lineage.map(&:inspect).join(' / ')
+
+    failures << "Missing #{key_display}" unless actual_hash.has_key?(key)
+
+    value = actual_hash[key]
+    if value.is_a?(Hash)
+      failures << assert(value, assertions_hash[key], lineage)
+    else
+      to_assertion(assertion).call(value) do |failure_message|
+        failures << "For #{key_display}, #{failure_message}"
+      end
+    end
+  end
+
+  return failures
+end
+
+def to_assertion(obj)
+  case obj
+  when Proc
+    obj
+  when Range
+    Expectations.in_range(obj)
+  when Regexp
+    Expectations.matches(obj)
+  end
+end
+
+module Expectations
+  def any(klass)
+    ->(x, &error) {
+      unless x.is_a?(klass)
+        error.call("expected a #{klass.name}, got: #{x.inspect}")
+      end
+    }
+  end
+
+  def one_of(*items)
+    ->(x, &error) {
+      unless items.include?(x)
+        error.call("expected one of #{items * ', '}, got: #{x.inspect}")
+      end
+    }
+  end
+
+  alias_method :either, :one_of
+
+  def in_range(range)
+    ->(x, &error) {
+      unless range.cover?(x)
+        error.call("expected #{x} to be in #{range.inspect}")
+      end
+    }
+  end
+
+  def matches(pattern)
+    ->(x, &error) {
+      unless x.to_s =~ pattern
+        error.call("expected something like #{pattern.to_s}, got: #{x.inspect}")
+      end
+    }
+  end
+
+  # list_of(&block)  is block right? or another matcher...
+end
+
+include Expectations
+
+resp = { status: 'success',
+          code: 42,
+          deets: {
+            name: 'Peet',
+            age: 11
+          }
+        }
+
+puts assert(resp, status: any(Symbol),
+              code: either(5, 23),
+              deets: {
+                name: /@[A-Z][a-z]+/,
+                age: 0..100
+              })

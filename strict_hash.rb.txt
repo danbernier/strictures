@@ -1,0 +1,53 @@
+class StrictHash
+  def initialize(hash, &if_missing)
+    unless hash.is_a?(Hash)
+      raise "Looking for a hash, but got a #{hash.class.name}: #{hash.inspect}"
+    end
+
+    @hash = hash
+
+    @if_missing = if_missing || ->(key) {
+      raise "Looking for key #{key.inspect}, but only have keys: #{keys.sort_by(&:inspect).inspect}"
+    }
+  end
+
+  def [](key)
+    make_strict(@hash.fetch(key, &@if_missing))
+  end
+
+  def method_missing(name, *args, &block)
+    @hash.send(name, *args, &block)
+  end
+
+  private
+
+  def make_strict(val)
+    if val.is_a?(Hash)
+      StrictHash.new(val)
+    else
+      val
+    end
+  end
+end
+
+# p Hash.ancestors
+
+resp = { status: 'success', code: 42,
+          deets: { name: 'Peet' }
+        }
+
+strict = StrictHash.new(resp)
+
+p resp['bogus']     #=> nil
+p strict['bogus']   #=> Looking for key "bogus", but only have keys: [:code, :deets, :status] (RuntimeError)
+
+p resp[:deets][:age]     #=> nil
+p strict[:deets][:age]   #=> Looking for key :age, but only have keys: [:name] (RuntimeError)
+
+p StrictHash.new('<xml>crap</xml')  #=> Looking for a hash, but got a String: "<xml>crap</xml" (RuntimeError)
+
+less_strict = StrictHash.new(resp) do |key|
+  puts "Ima mail you about this missing key: #{key} from #{resp.inspect}"
+end
+
+less_strict['bogus']   #=> Ima mail you about this missing key: bogus from {:status=>"success", :code=>42, :deets=>{:name=>"Peet"}}

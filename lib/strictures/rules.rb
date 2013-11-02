@@ -15,5 +15,13 @@ module Strictures
         end
       }
     end
+
+    def matches_hash(example_hash)
+      ->(actual_hash) {
+        example_hash.each do |key, rule|
+          actual_hash[key]
+        end
+      }
+    end
   end
 end

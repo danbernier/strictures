@@ -1,0 +1,14 @@
+def assert(condition, &msg)
+  return true if condition
+
+  puts "Sending this to Raven: #{msg.call.inspect}"
+  return false
+end
+
+def stuff(x)
+  assert(x == 1) { "OH SHIT: #{x} isn't 1" } or return
+  puts "all ok"
+end
+
+stuff(1)    #=> all ok
+stuff(24)   #=> Sending this to Raven: "OH SHIT: 24 isn't 1"
